@@ -1,4 +1,5 @@
 let synth;
+let isSynthInitialized;
 const startButton = document.getElementById('startButton');
 const tutorialControls = document.getElementById('tutorialControls');
 const songSelect = document.getElementById('songSelect');
@@ -8,6 +9,13 @@ const songTitleElement = document.getElementById('songTitle');
 const progressElement = document.getElementById('progress');
 const pianoElement = document.getElementById('piano');
 const sheetMusicElement = document.getElementById('sheetMusic');
+
+const createSongButton = document.getElementById('createSongButton');
+const songEditor = document.getElementById('songEditor');
+const songForm = document.getElementById('songForm');
+const addNoteButton = document.getElementById('addNote');
+const notesContainer = document.getElementById('notesContainer');
+
 const activeNotes = new Set();
 let currentSong = null;
 let currentNoteIndex = 0;
@@ -16,13 +24,30 @@ let isPlaying = false;
 let notasPiano = [];
 let songs = {};
 
+// Função para carregar as músicas do LocalStorage ou do arquivo musics.json
+async function loadSongs() {
+    const storedSongs = localStorage.getItem('songs');
+    if (storedSongs) {
+        songs = JSON.parse(storedSongs);
+    } else {
+        try {
+            const response = await fetch('musics.json');
+            const data = await response.json();
+            songs = data.songs;
+            localStorage.setItem('songs', JSON.stringify(songs));
+        } catch (error) {
+            console.error('Erro ao carregar musics.json:', error);
+        }
+    }
+    populateSongSelect();
+}
+
 fetch('musics.json')
     .then(response => response.json())
     .then(data => {
         notasPiano = data.notaspiano;
-        songs = data.songs;
+        loadSongs();
         createPiano();
-        populateSongSelect();
     })
     .catch(error => console.error('Erro ao carregar musics.json:', error));
 
@@ -39,9 +64,10 @@ function createPiano() {
     initializePiano(keys);
 }
 
-function populateSongSelect() {
+function populateSongSelect(filteredSongs = null) {
     songSelect.innerHTML = '<option value="">Selecione uma música</option>';
-    for (const [key, song] of Object.entries(songs)) {
+    const songsToPopulate = filteredSongs || Object.entries(songs);
+    for (const [key, song] of songsToPopulate) {
         const option = document.createElement('option');
         option.value = key;
         option.textContent = `${song.title} (${song.difficulty})`;
@@ -52,6 +78,7 @@ function populateSongSelect() {
 startButton.addEventListener('click', async () => {
     await Tone.start();
     synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    isSynthInitialized = true;
     startButton.disabled = true;
     startButton.textContent = 'Piano Iniciado';
     tutorialControls.style.display = 'block';
@@ -74,19 +101,29 @@ function initializePiano(keys) {
         key.addEventListener('touchend', () => handleEnd(key));
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (e.repeat) return;
-        const key = document.querySelector(`.key[data-note="${getNoteFromKeyboard(e.key)}"]`);
-        if (key) handleStart(e, key);
-    });
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+}
 
-    document.addEventListener('keyup', (e) => {
-        const key = document.querySelector(`.key[data-note="${getNoteFromKeyboard(e.key)}"]`);
+function handleKeyDown(e) {
+    if (e.repeat) return;
+    const note = getNoteFromKeyboard(e.key);
+    if (note) {
+        const key = document.querySelector(`.key[data-note="${note}"]`);
+        if (key) handleStart(e, key);
+    }
+}
+
+function handleKeyUp(e) {
+    const note = getNoteFromKeyboard(e.key);
+    if (note) {
+        const key = document.querySelector(`.key[data-note="${note}"]`);
         if (key) handleEnd(key);
-    });
+    }
 }
 
 function handleStart(e, key) {
+    if (!isSynthInitialized) return;
     e.preventDefault();
     const note = key.dataset.note;
     if (!activeNotes.has(note)) {
@@ -110,6 +147,7 @@ function handleStart(e, key) {
 }
 
 function handleEnd(key) {
+    if (!isSynthInitialized) return;
     const note = key.dataset.note;
     if (activeNotes.has(note)) {
         activeNotes.delete(note);
@@ -120,12 +158,13 @@ function handleEnd(key) {
 }
 
 function getNoteFromKeyboard(key) {
+    if (typeof key !== 'string') return null;
     const keyboardMap = {
         'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4',
         't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
         'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5'
     };
-    return keyboardMap[key.toLowerCase()];
+    return keyboardMap[key.toLowerCase()] || null;
 }
 
 function startTutorial(songKey) {
@@ -193,7 +232,6 @@ function removeAllHighlights() {
     const keys = document.querySelectorAll('.key');
     keys.forEach(key => key.classList.remove('playing'));
 }
-
 
 // Adicione este event listener para o botão de tocar música
 playMusicButton.addEventListener('click', () => {
@@ -277,6 +315,7 @@ function updateSheetMusic() {
 }
 
 function getDidacticInfo(note) {
+    if (!note) return "";
     let info = "Sabia que: ";
     switch (note.duration) {
         case "1/4":
@@ -329,6 +368,85 @@ function populateSongSelect(filteredSongs = null) {
     }
 }
 
+// Mostrar/ocultar o editor de músicas
+createSongButton.addEventListener('click', () => {
+    songEditor.style.display = songEditor.style.display === 'none' ? 'block' : 'none';
+    createSongButton.textContent = songEditor.style.display === 'none' ? 'Criar Música' : 'Fechar Editor';
+});
+
+// Função para adicionar um novo campo de nota
+function addNoteField() {
+    const noteInput = document.createElement('div');
+    noteInput.className = 'note-input';
+    noteInput.innerHTML = `
+        <input type="text" class="note" placeholder="Nota (ex: C4)" required>
+        <input type="text" class="duration" placeholder="Duração (ex: 1/4)" required>
+        <input type="text" class="lyrics" placeholder="Letra">
+        <button type="button" class="remove-note">Remover</button>
+    `;
+    notesContainer.appendChild(noteInput);
+
+    noteInput.querySelector('.remove-note').addEventListener('click', () => {
+        notesContainer.removeChild(noteInput);
+    });
+}
+
+// Adicionar nota ao clicar no botão
+addNoteButton.addEventListener('click', addNoteField);
+
+// Usar o piano virtual para adicionar notas
+pianoElement.addEventListener('click', (e) => {
+    if (e.target.classList.contains('key') && songEditor.style.display !== 'none') {
+        const note = e.target.dataset.note;
+        const lastNoteInput = notesContainer.querySelector('.note-input:last-child .note');
+        if (lastNoteInput && lastNoteInput.value === '') {
+            lastNoteInput.value = note;
+        } else {
+            addNoteField();
+            notesContainer.querySelector('.note-input:last-child .note').value = note;
+        }
+    }
+});
+
+// Função para salvar a música
+songForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const newSong = {
+        title: document.getElementById('title').value,
+        difficulty: document.getElementById('difficulty').value,
+        tags: document.getElementById('tags').value.split(',').map(tag => tag.trim()),
+        timeSignature: document.getElementById('timeSignature').value,
+        key: document.getElementById('key').value,
+        notes: [],
+        sheet: []
+    };
+
+    const noteInputs = notesContainer.querySelectorAll('.note-input');
+    noteInputs.forEach(input => {
+        const note = input.querySelector('.note').value;
+        const duration = input.querySelector('.duration').value;
+        const lyrics = input.querySelector('.lyrics').value;
+
+        newSong.notes.push(note);
+        newSong.sheet.push({ note, duration, lyrics });
+    });
+
+    // Salvar a nova música no LocalStorage
+    const songKey = newSong.title.toLowerCase().replace(/\s+/g, '');
+    songs[songKey] = newSong;
+    localStorage.setItem('songs', JSON.stringify(songs));
+
+    alert('Nova música salva com sucesso!');
+
+    // Atualizar a lista de músicas no frontend
+    populateSongSelect();
+
+    // Limpar o formulário após salvar
+    songForm.reset();
+    notesContainer.innerHTML = '';
+});
+
 // Adicionar event listeners para os filtros
 document.getElementById('difficultyFilter').addEventListener('change', (e) => {
     const selectedDifficulty = e.target.value;
@@ -347,3 +465,4 @@ document.getElementById('tagFilter').addEventListener('change', (e) => {
         populateSongSelect();
     }
 });
+
