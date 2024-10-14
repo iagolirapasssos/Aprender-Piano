@@ -1,0 +1,269 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --background-color: #f0f0f0;
+    --text-color: #333;
+    --border-color: #ddd;
+    --highlight-color: #ffff00;
+    --correct-color: #90EE90;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button, select {
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#playMusic {
+    background-color: var(--secondary-color);
+}
+
+#playMusic:hover {
+    background-color: #0b7dda;
+}
+
+select {
+    background-color: white;
+    border: 1px solid var(--border-color);
+}
+
+select:hover {
+    border-color: #999;
+}
+
+#tutorialControls {
+    display: none;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#filters select {
+    width: 48%;
+}
+
+#songSelect {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.piano-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.piano {
+    display: flex;
+    touch-action: none;
+    min-width: max-content;
+}
+
+.key {
+    width: 30px;
+    height: 150px;
+    border: 1px solid #000;
+    background-color: white;
+    margin: 0 1px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: all 0.1s ease;
+    font-size: 10px;
+}
+
+.key.black {
+    width: 20px;
+    height: 90px;
+    background-color: black;
+    color: white;
+    margin-left: -11px;
+    margin-right: -11px;
+    z-index: 1;
+}
+
+.key.highlight {
+    background-color: var(--highlight-color) !important;
+}
+
+.key.correct {
+    background-color: var(--correct-color) !important;
+}
+
+#songInfo, #songTitle, #progress, #sheetMusic, #instructions {
+    width: 100%;
+    max-width: 800px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#songTitle {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#progress {
+    font-size: 18px;
+    text-align: center;
+    color: #666;
+}
+
+#sheetMusic h3 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.sheet-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.note {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.note:hover {
+    background-color: #f0f0f0;
+}
+
+.note.current-note {
+    background-color: #e6f7ff;
+    border-color: var(--secondary-color);
+}
+
+.note-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.note-name {
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0;
+}
+
+.note-duration {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.note-lyrics {
+    font-size: 16px;
+    font-style: italic;
+    margin: 5px 0 0 0;
+}
+
+.didactic-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e6f7ff;
+    border-radius: 5px;
+    font-style: italic;
+}
+
+#instructions h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+#instructions ul {
+    padding-left: 20px;
+}
+
+#instructions li {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    #filters {
+        flex-direction: column;
+    }
+
+    #filters select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    button, select {
+        width: 100%;
+    }
+}
+
+.key.playing {
+    background-color: var(--highlight-color);
+    transform: scale(0.98);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.key.black.playing {
+    background-color: #666;
+}

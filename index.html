@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Virtual de 88 Teclas com Tutorial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Piano Virtual com Tutorial</h1>
+    <button id="startButton">Iniciar Piano</button>
+    <div id="tutorialControls">
+        <div id="filters">
+            <select id="difficultyFilter">
+                <option value="">Todas as dificuldades</option>
+                <option value="Fácil">Fácil</option>
+                <option value="Intermediário">Intermediário</option>
+                <option value="Avançado">Avançado</option>
+            </select>
+            <select id="tagFilter">
+                <option value="">Todas as tags</option>
+                <option value="tradicional">Tradicional</option>
+                <option value="clássica">Clássica</option>
+                <option value="infantil">Infantil</option>
+                <option value="folk">Folk</option>
+                <option value="videogame">Videogame</option>
+                <option value="brasileira">Brasileira</option>
+            </select>
+        </div>
+        <select id="songSelect">
+            <option value="">Selecione uma música</option>
+        </select>
+        <button id="playMusic">Tocar música</button>
+        <button id="startTutorial">Iniciar Tutorial</button>
+    </div>
+    <div id="songInfo"></div>
+    <div id="songTitle"></div>
+    <div id="sheetMusic"></div>
+    <div id="progress"></div>
+    <div class="piano-container">
+        <div class="piano" id="piano"></div>
+    </div>
+    <div id="instructions">
+        <h3>Instruções:</h3>
+        <ul>
+            <li>Clique em "Iniciar Piano" para começar.</li>
+            <li>Selecione uma música e clique em "Tocar música" para ouvir.</li>
+            <li>Clique em "Iniciar Tutorial" para começar a praticar.</li>
+            <li>Siga as notas destacadas na partitura e no teclado.</li>
+            <li>Você pode clicar nas notas da partitura para navegar pela música.</li>
+            <li>Use o teclado do computador ou clique nas teclas do piano virtual para tocar.</li>
+        </ul>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
